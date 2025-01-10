@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تحويل النص إلى صوت</title>
-    <script src="https://code.responsivevoice.org/responsivevoice.js?key=Gxo7o8NU"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Cairo', sans-serif;
@@ -15,8 +13,6 @@
             margin: 0;
             padding: 20px;
             direction: rtl;
-            border: 5px solid #4CAF50;
-            border-radius: 10px;
         }
         textarea {
             width: 80%;
@@ -35,7 +31,7 @@
         }
         .controls button {
             padding: 10px 20px;
-            font-size: 1.2em;
+            font-size: 1em;
             margin: 5px;
             border: none;
             border-radius: 8px;
@@ -46,28 +42,6 @@
         .controls button:hover {
             background-color: #45a049;
         }
-        .settings {
-            margin: 10px 0;
-        }
-        label {
-            margin: 0 10px;
-            font-size: 1.2em;
-        }
-        #textDisplay {
-            font-size: 1.2em;
-            line-height: 1.8;
-            margin: 20px auto;
-            width: 80%;
-            text-align: justify;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            background-color: #fff;
-            overflow: hidden;
-        }
-        .highlight {
-            background-color: yellow;
-        }
     </style>
 </head>
 <body>
@@ -75,99 +49,23 @@
     <h1>تحويل النص إلى صوت</h1>
     <textarea id="textToConvert" placeholder="اكتب النص هنا..."></textarea>
     <div class="controls">
-        <button onclick="convertTextToSpeech()">تشغيل الصوت</button>
-        <button onclick="stopSpeech()">إيقاف الصوت</button>
+        <button onclick="speakText()">تشغيل الصوت</button>
     </div>
-
-    <div class="settings">
-        <label>
-            <input type="radio" name="voiceGender" value="male" checked> صوت ذكر
-        </label>
-        <label>
-            <input type="radio" name="voiceGender" value="female"> صوت أنثى
-        </label>
-        <br>
-        <label>
-            السرعة:
-            <input type="number" id="speedControl" value="1" step="0.1" min="0.5" max="2">
-        </label>
-    </div>
-
-    <div id="textDisplay"></div>
-
-    <!-- إضافة موسيقى الخلفية -->
-    <audio id="backgroundMusic" loop autoplay>
-        <source src="path/to/your/music.mp3" type="audio/mp3">
-        متصفحك لا يدعم تشغيل الصوت.
-    </audio>
-    <button onclick="toggleMusic()">تشغيل/إيقاف الموسيقى</button>
 
     <script>
-        let currentIndex = 0;
-        let interval;
-
-        function convertTextToSpeech() {
+        function speakText() {
             const text = document.getElementById("textToConvert").value.trim();
             if (text === "") {
                 alert("يرجى إدخال نص لتحويله إلى صوت.");
                 return;
             }
 
-            const voiceGender = document.querySelector('input[name="voiceGender"]:checked').value;
-            const speed = parseFloat(document.getElementById("speedControl").value) || 1;
-
-            const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
-
-            // تحريك النص
-            const words = text.split(" ");
-            const textDisplay = document.getElementById("textDisplay");
-            textDisplay.innerHTML = "";
-            currentIndex = 0;
-            
-            for (let word of words) {
-                const span = document.createElement("span");
-                span.textContent = word + " ";
-                textDisplay.appendChild(span);
-            }
-
-            const spans = textDisplay.getElementsByTagName("span");
-
-            // تشغيل الصوت باستخدام ResponsiveVoice
-            responsiveVoice.speak(text, voice, {
-                rate: speed,
-                onstart: function() {
-                    interval = setInterval(() => {
-                        if (currentIndex < spans.length) {
-                            spans[currentIndex].classList.add("highlight");
-                            if (currentIndex > 0) spans[currentIndex - 1].classList.remove("highlight");
-                            currentIndex++;
-                        } else {
-                            clearInterval(interval);
-                        }
-                    }, 600 / speed);
-                },
-                onend: function() {
-                    clearInterval(interval);
-                }
-            });
-        }
-
-        function stopSpeech() {
-            responsiveVoice.cancel();
-            clearInterval(interval);
-            const spans = document.getElementById("textDisplay").getElementsByTagName("span");
-            for (let span of spans) {
-                span.classList.remove("highlight");
-            }
-        }
-
-        function toggleMusic() {
-            var music = document.getElementById("backgroundMusic");
-            if (music.paused) {
-                music.play();
-            } else {
-                music.pause();
-            }
+            const speech = new SpeechSynthesisUtterance(text);
+            const selectedVoice = speechSynthesis.getVoices().find(voice => voice.lang === 'ar-SA');  // اختيار صوت عربي
+            speech.voice = selectedVoice || speechSynthesis.getVoices()[0];  // اختيار الصوت الافتراضي إذا لم يكن الصوت العربي متاحًا.
+            speech.rate = 1;  // التحكم في سرعة الصوت
+            speech.pitch = 1;  // التحكم في خشونة الصوت
+            speechSynthesis.speak(speech);
         }
     </script>
 
