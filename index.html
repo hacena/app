@@ -50,11 +50,26 @@
         label {
             margin: 0 10px;
         }
+        .download-link {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF;
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .download-link:hover {
+            background-color: #0056b3;
+        }
         #voiceImage {
-            width: 200px;
+            width: 150px;
             margin-top: 20px;
             border-radius: 50%;
             transition: transform 0.3s ease-in-out;
+        }
+        #voiceImageMale, #voiceImageFemale {
+            display: none;
         }
     </style>
 </head>
@@ -81,9 +96,9 @@
         </label>
     </div>
 
-    <!-- القاررئ -->
-    <img id="voiceImage" src="<img id="voiceImage" src="https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe" alt="صورة صوت القارئ">
-" alt=" القارئ>
+    <!-- صور القارئ -->
+    <img id="voiceImageMale" src="https://drive.google.com/uc?export=view&id=1zojeRp9I1xGlX1spSWA3SEu_OQXzxnsG" alt="صورة صوت القارئ - ذكر">
+    <img id="voiceImageFemale" src="https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe" alt="صورة صوت القارئ - أنثى">
 
     <script>
         function convertTextToSpeech() {
@@ -100,14 +115,21 @@
             // تشغيل الصوت باستخدام ResponsiveVoice
             const voice = voiceGender === 'male' ? "Arabic Male" : "Arabic Female";
             responsiveVoice.speak(text, voice, { rate: speed, pitch: 1 });
-            
-            // حركة الصورة عند تشغيل الصوت
-            document.getElementById("voiceImage").style.transform = "rotate(360deg)";
+
+            // إظهار الصورة المناسبة
+            if (voiceGender === 'male') {
+                document.getElementById("voiceImageMale").style.display = "block";
+                document.getElementById("voiceImageFemale").style.display = "none";
+            } else {
+                document.getElementById("voiceImageMale").style.display = "none";
+                document.getElementById("voiceImageFemale").style.display = "block";
+            }
         }
 
         function stopSpeech() {
             responsiveVoice.cancel();
-            document.getElementById("voiceImage").style.transform = "rotate(0deg)"; // إيقاف الحركة للصورة
+            document.getElementById("voiceImageMale").style.display = "none";
+            document.getElementById("voiceImageFemale").style.display = "none";
         }
     </script>
 
