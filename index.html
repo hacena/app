@@ -15,6 +15,8 @@
             margin: 0;
             padding: 20px;
             direction: rtl;
+            border: 5px solid #4CAF50;
+            border-radius: 10px;
         }
         textarea {
             width: 80%;
@@ -33,7 +35,7 @@
         }
         .controls button {
             padding: 10px 20px;
-            font-size: 1em;
+            font-size: 1.2em;
             margin: 5px;
             border: none;
             border-radius: 8px;
@@ -49,15 +51,7 @@
         }
         label {
             margin: 0 10px;
-        }
-        .image-container {
-            margin: 20px;
-            display: none;
-        }
-        .image-container img {
-            width: 200px;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 1.2em;
         }
         #textDisplay {
             font-size: 1.2em;
@@ -99,11 +93,14 @@
         </label>
     </div>
 
-    <div id="imageDisplay" class="image-container">
-        <img id="voiceImage" src="https://via.placeholder.com/200" alt="صورة صوت القارئ">
-    </div>
-
     <div id="textDisplay"></div>
+
+    <!-- إضافة موسيقى الخلفية -->
+    <audio id="backgroundMusic" loop autoplay>
+        <source src="path/to/your/music.mp3" type="audio/mp3">
+        متصفحك لا يدعم تشغيل الصوت.
+    </audio>
+    <button onclick="toggleMusic()">تشغيل/إيقاف الموسيقى</button>
 
     <script>
         let currentIndex = 0;
@@ -120,11 +117,6 @@
             const speed = parseFloat(document.getElementById("speedControl").value) || 1;
 
             const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
-            const imageSrc = voiceGender === 'male' ? 'https://drive.google.com/uc?export=view&id=1zojeRp9I1xGlX1spSWA3SEu_OQXzxnsG' : 'https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe';
-
-            // عرض صورة القارئ (ذكر أو أنثى)
-            document.getElementById("voiceImage").src = imageSrc;
-            document.getElementById("imageDisplay").style.display = "block";
 
             // تحريك النص
             const words = text.split(" ");
@@ -152,11 +144,10 @@
                         } else {
                             clearInterval(interval);
                         }
-                    }, 600 / speed);  // تحديد سرعة حركة النص بناءً على السرعة المحددة
+                    }, 600 / speed);
                 },
                 onend: function() {
                     clearInterval(interval);
-                    document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة بعد الانتهاء
                 }
             });
         }
@@ -164,10 +155,18 @@
         function stopSpeech() {
             responsiveVoice.cancel();
             clearInterval(interval);
-            document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة عند الإيقاف
             const spans = document.getElementById("textDisplay").getElementsByTagName("span");
             for (let span of spans) {
                 span.classList.remove("highlight");
+            }
+        }
+
+        function toggleMusic() {
+            var music = document.getElementById("backgroundMusic");
+            if (music.paused) {
+                music.play();
+            } else {
+                music.pause();
             }
         }
     </script>
