@@ -20,12 +20,13 @@
         h1 {
             color: white; /* لون العنوان باللون الأبيض */
             margin-bottom: 20px;
+            font-size: 2em; /* تكبير حجم العنوان */
         }
 
         textarea {
             width: 80%;
             height: 150px;
-            font-size: 1.2em;
+            font-size: 1.5em; /* تكبير حجم الخط في مربع النص */
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -45,8 +46,8 @@
         }
 
         .controls button {
-            padding: 10px 20px;
-            font-size: 1em;
+            padding: 12px 25px; /* تكبير حجم الأزرار */
+            font-size: 1.2em; /* تكبير الخط في الأزرار */
             margin: 5px;
             border: none;
             border-radius: 8px;
@@ -71,10 +72,11 @@
 
         label {
             margin: 0 10px;
+            font-size: 1.2em; /* تكبير الخط في التسمية */
         }
 
         #textDisplay {
-            font-size: 1.2em;
+            font-size: 1.5em; /* تكبير حجم الخط في النص المعروض */
             line-height: 1.8;
             margin: 20px auto;
             width: 80%;
@@ -88,17 +90,6 @@
 
         .highlight {
             background-color: yellow; /* تأثير تسليط الضوء على النص */
-        }
-
-        .image-container {
-            margin: 20px;
-            display: none;
-        }
-
-        .image-container img {
-            width: 200px;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -125,10 +116,6 @@
         </label>
     </div>
 
-    <div id="imageDisplay" class="image-container">
-        <img id="voiceImage" src="https://via.placeholder.com/200" alt="صورة صوت القارئ">
-    </div>
-
     <div id="textDisplay"></div>
 
     <script>
@@ -146,11 +133,6 @@
             const speed = parseFloat(document.getElementById("speedControl").value) || 1;
 
             const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
-            const imageSrc = voiceGender === 'male' ? 'https://via.placeholder.com/200' : 'https://via.placeholder.com/200';
-
-            // عرض صورة القارئ (ذكر أو أنثى)
-            document.getElementById("voiceImage").src = imageSrc;
-            document.getElementById("imageDisplay").style.display = "block";
 
             // تحريك النص
             const words = text.split(" ");
@@ -182,7 +164,6 @@
                 },
                 onend: function() {
                     clearInterval(interval);
-                    document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة بعد الانتهاء
                 }
             });
         }
@@ -190,7 +171,6 @@
         function stopSpeech() {
             responsiveVoice.cancel();
             clearInterval(interval);
-            document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة عند الإيقاف
             const spans = document.getElementById("textDisplay").getElementsByTagName("span");
             for (let span of spans) {
                 span.classList.remove("highlight");
