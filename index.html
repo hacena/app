@@ -122,7 +122,8 @@
 
             // تحديد الصوت وصورة القارئ بناءً على النوع
             const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
-            const imageSrc = voiceGender === 'male' ? 'https://drive.google.com/uc?export=view&id=1zojeRp9I1xGlX1spSWA3SEu_OQXzxnsG' : 'https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe';
+            const imageSrc = voiceGender === 'male' ? '<img id="voiceImage" src="https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe" alt="صورة صوت القارئ">
+' : 'https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe';
 
             // عرض صورة القارئ (ذكر أو أنثى)
             document.getElementById("voiceImage").src = imageSrc;
