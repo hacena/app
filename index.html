@@ -99,8 +99,9 @@
         </label>
     </div>
 
+    <!-- قسم لعرض الصورة -->
     <div id="imageDisplay" class="image-container">
-        <img id="voiceImage" src="https://via.placeholder.com/200" alt="صورة صوت القارئ">
+        <img id="voiceImage" src="" alt="صورة صوت القارئ">
     </div>
 
     <div id="textDisplay"></div>
@@ -119,8 +120,9 @@
             const voiceGender = document.querySelector('input[name="voiceGender"]:checked').value;
             const speed = parseFloat(document.getElementById("speedControl").value) || 1;
 
+            // تحديد الصوت وصورة القارئ بناءً على النوع
             const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
-            const imageSrc = voiceGender === 'male' ? 'https://via.placeholder.com/200' : 'https://via.placeholder.com/200';
+            const imageSrc = voiceGender === 'male' ? 'https://drive.google.com/uc?export=view&id=1zojeRp9I1xGlX1spSWA3SEu_OQXzxnsG' : 'https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe';
 
             // عرض صورة القارئ (ذكر أو أنثى)
             document.getElementById("voiceImage").src = imageSrc;
