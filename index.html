@@ -3,10 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اختبار عرض الصور</title>
+    <title>تحويل النص إلى صوت</title>
+    <script src="https://code.responsivevoice.org/responsivevoice.js?key=Gxo7o8NU"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        textarea {
+            width: 80%;
+            height: 150px;
+            font-size: 1.2em;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+            text-align: justify;
+            resize: none;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        .controls button {
+            padding: 10px 20px;
+            font-size: 1em;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .controls button:hover {
+            background-color: #45a049;
+        }
+        .settings {
+            margin: 10px 0;
+        }
+        label {
+            margin: 0 10px;
+        }
+        .image-container {
+            margin: 20px;
+            display: none;
+        }
+        .image-container img {
+            width: 200px;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #textDisplay {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin: 20px auto;
+            width: 80%;
+            text-align: justify;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+            overflow: hidden;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+    </style>
 </head>
 <body>
-    <h1>اختبار عرض الصورة</h1>
-    <img id="voiceImageMale" src="https://via.placeholder.com/150" alt="صورة صوت القارئ - ذكر">
+
+    <h1>تحويل النص إلى صوت</h1>
+    <textarea id="textToConvert" placeholder="اكتب النص هنا..."></textarea>
+    <div class="controls">
+        <button onclick="convertTextToSpeech()">تشغيل الصوت</button>
+        <button onclick="stopSpeech()">إيقاف الصوت</button>
+    </div>
+
+    <div class="settings">
+        <label>
+            <input type="radio" name="voiceGender" value="male" checked> صوت ذكر
+        </label>
+        <label>
+            <input type="radio" name="voiceGender" value="female"> صوت أنثى
+        </label>
+        <br>
+        <label>
+            السرعة:
+            <input type="number" id="speedControl" value="1" step="0.1" min="0.5" max="2">
+        </label>
+    </div>
+
+    <div id="imageDisplay" class="image-container">
+        <img id="voiceImage" src="https://via.placeholder.com/200" alt="صورة صوت القارئ">
+    </div>
+
+    <div id="textDisplay"></div>
+
+    <script>
+        let currentIndex = 0;
+        let interval;
+
+        function convertTextToSpeech() {
+            const text = document.getElementById("textToConvert").value.trim();
+            if (text === "") {
+                alert("يرجى إدخال نص لتحويله إلى صوت.");
+                return;
+            }
+
+            const voiceGender = document.querySelector('input[name="voiceGender"]:checked').value;
+            const speed = parseFloat(document.getElementById("speedControl").value) || 1;
+
+            const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
+            const imageSrc = voiceGender === 'male' 
+                ? 'https://drive.google.com/uc?export=view&id=1zojeRp9I1xGlX1spSWA3SEu_OQXzxnsG' 
+                : 'https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe';
+
+            // عرض صورة القارئ (ذكر أو أنثى)
+            document.getElementById("voiceImage").src = imageSrc;
+            document.getElementById("imageDisplay").style.display = "block";
+
+            // تحريك النص
+            const words = text.split(" ");
+            const textDisplay = document.getElementById("textDisplay");
+            textDisplay.innerHTML = "";
+            currentIndex = 0;
+            
+            for (let word of words) {
+                const span = document.createElement("span");
+                span.textContent = word + " ";
+                textDisplay.appendChild(span);
+            }
+
+            const spans = textDisplay.getElementsByTagName("span");
+
+            // تشغيل الصوت باستخدام ResponsiveVoice
+            responsiveVoice.speak(text, voice, {
+                rate: speed,
+                onstart: function() {
+                    interval = setInterval(() => {
+                        if (currentIndex < spans.length) {
+                            spans[currentIndex].classList.add("highlight");
+                            if (currentIndex > 0) spans[currentIndex - 1].classList.remove("highlight");
+                            currentIndex++;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 600 / speed);  // تحديد سرعة حركة النص بناءً على السرعة المحددة
+                },
+                onend: function() {
+                    clearInterval(interval);
+                    document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة بعد الانتهاء
+                }
+            });
+        }
+
+        function stopSpeech() {
+            responsiveVoice.cancel();
+            clearInterval(interval);
+            document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة عند الإيقاف
+            const spans = document.getElementById("textDisplay").getElementsByTagName("span");
+            for (let span of spans) {
+                span.classList.remove("highlight");
+            }
+        }
+    </script>
+
 </body>
 </html>
