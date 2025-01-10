@@ -1,0 +1,89 @@
+from flask import Flask, request, jsonify, render_template, send_file
+import os
+import subprocess
+from gtts import gTTS  # لتحويل النص إلى صوت
+import requests  # لإرسال طلبات API
+
+# إعداد التطبيق
+app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+RESULTS_FOLDER = os.path.join(BASE_DIR, 'results')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(RESULTS_FOLDER, exist_ok=True)
+
+# مسار API لتوليد الصور (استبدل بالرابط المناسب إذا كنت تستخدم Stable Diffusion أو OpenAI API)
+IMAGE_GENERATION_API = "https://api.example.com/generate-image"
+API_KEY = "your_api_key_here"
+
+# الصفحة الرئيسية
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+# تحويل النص إلى صوت
+@app.route('/generate-audio', methods=['POST'])
+def generate_audio():
+    text = request.form.get('text')
+    if not text:
+        return jsonify({"error": "Text is required"}), 400
+
+    tts = gTTS(text, lang='ar')  # إنشاء الصوت باللغة العربية
+    audio_path = os.path.join(RESULTS_FOLDER, 'audio.mp3')
+    tts.save(audio_path)
+
+    return jsonify({"audio_path": "/results/audio.mp3"})
+
+# توليد الصورة تلقائيًا
+@app.route('/generate-image', methods=['POST'])
+def generate_image():
+    text = request.form.get('text')
+    if not text:
+        return jsonify({"error": "Text is required"}), 400
+
+    # إرسال طلب إلى API لتوليد الصور
+    response = requests.post(
+        IMAGE_GENERATION_API,
+        headers={"Authorization": f"Bearer {API_KEY}"},
+        json={"prompt": text, "size": "512x512"}
+    )
+
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to generate image"}), 500
+
+    image_url = response.json().get('image_url')
+    image_path = os.path.join(RESULTS_FOLDER, 'image.jpg')
+
+    # تنزيل الصورة
+    img_data = requests.get(image_url).content
+    with open(image_path, 'wb') as handler:
+        handler.write(img_data)
+
+    return jsonify({"image_path": "/results/image.jpg"})
+
+# إنشاء الفيديو
+@app.route('/generate-video', methods=['POST'])
+def generate_video():
+    audio_path = os.path.join(RESULTS_FOLDER, 'audio.mp3')
+    image_path = os.path.join(RESULTS_FOLDER, 'image.jpg')
+    video_path = os.path.join(RESULTS_FOLDER, 'video.mp4')
+
+    if not os.path.exists(audio_path) or not os.path.exists(image_path):
+        return jsonify({"error": "Audio or image file is missing"}), 400
+
+    # دمج الصوت والصورة باستخدام FFmpeg
+    command = [
+        'ffmpeg', '-y', '-i', audio_path, '-i', image_path,
+        '-c:v', 'libx264', '-tune', 'stillimage', '-pix_fmt', 'yuv420p', video_path
+    ]
+    subprocess.run(command, check=True)
+
+    return jsonify({"video_path": "/results/video.mp4"})
+
+# تقديم الملفات الثابتة
+@app.route('/results/<filename>')
+def results(filename):
+    return send_file(os.path.join(RESULTS_FOLDER, filename))
+
+if __name__ == '__main__':
+    app.run(debug=True)
