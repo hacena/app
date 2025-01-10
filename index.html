@@ -19,7 +19,7 @@
         textarea {
             width: 80%;
             height: 150px;
-            font-size: 1.4em;
+            font-size: 1.2em;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -32,8 +32,8 @@
             margin: 10px 0;
         }
         .controls button {
-            padding: 15px 30px;
-            font-size: 1.2em;
+            padding: 10px 20px;
+            font-size: 1em;
             margin: 5px;
             border: none;
             border-radius: 8px;
@@ -49,7 +49,6 @@
         }
         label {
             margin: 0 10px;
-            font-size: 1.2em;
         }
         .image-container {
             margin: 20px;
@@ -61,7 +60,7 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         #textDisplay {
-            font-size: 1.4em;
+            font-size: 1.2em;
             line-height: 1.8;
             margin: 20px auto;
             width: 80%;
@@ -74,11 +73,6 @@
         }
         .highlight {
             background-color: yellow;
-        }
-        progress {
-            width: 80%;
-            height: 20px;
-            margin: 20px 0;
         }
     </style>
 </head>
@@ -106,26 +100,14 @@
     </div>
 
     <div id="imageDisplay" class="image-container">
-        <!-- الصورة سيتم تغييرها بناءً على الجنس (ذكر أو أنثى) -->
-        <img id="voiceImage" src="readerImage.jpg" alt="صورة صوت القارئ">
+        <img id="voiceImage" src="https://via.placeholder.com/200" alt="صورة صوت القارئ">
     </div>
 
     <div id="textDisplay"></div>
 
-    <!-- إضافة شريط التقدم -->
-    <div style="width: 80%; margin: 20px auto;">
-        <progress id="progressBar" value="0" max="100"></progress>
-    </div>
-
     <script>
         let currentIndex = 0;
         let interval;
-
-        function updateProgressBar(currentTime, totalDuration) {
-            const progressBar = document.getElementById("progressBar");
-            const progress = (currentTime / totalDuration) * 100;
-            progressBar.value = progress;
-        }
 
         function convertTextToSpeech() {
             const text = document.getElementById("textToConvert").value.trim();
@@ -138,9 +120,9 @@
             const speed = parseFloat(document.getElementById("speedControl").value) || 1;
 
             const voice = voiceGender === 'male' ? 'Arabic Male' : 'Arabic Female';
+            const imageSrc = voiceGender === 'male' ? 'https://drive.google.com/uc?export=view&id=1zojeRp9I1xGlX1spSWA3SEu_OQXzxnsG' : 'https://drive.google.com/uc?export=view&id=1Pu2wZ818dgClav6ZdEzfUe1FHiP9nYDe';
 
             // عرض صورة القارئ (ذكر أو أنثى)
-            const imageSrc = voiceGender === 'male' ? 'https://via.placeholder.com/200' : 'https://via.placeholder.com/200';
             document.getElementById("voiceImage").src = imageSrc;
             document.getElementById("imageDisplay").style.display = "block";
 
@@ -149,6 +131,7 @@
             const textDisplay = document.getElementById("textDisplay");
             textDisplay.innerHTML = "";
             currentIndex = 0;
+            
             for (let word of words) {
                 const span = document.createElement("span");
                 span.textContent = word + " ";
@@ -170,21 +153,10 @@
                             clearInterval(interval);
                         }
                     }, 600 / speed);  // تحديد سرعة حركة النص بناءً على السرعة المحددة
-
-                    let totalDuration = 0;
-                    responsiveVoice.getDuration(text, voice, function(duration) {
-                        totalDuration = duration;
-                    });
-
-                    setInterval(() => {
-                        if (totalDuration > 0) {
-                            updateProgressBar(currentIndex * 0.6, totalDuration); // تحديث شريط التقدم
-                        }
-                    }, 500);
                 },
                 onend: function() {
                     clearInterval(interval);
-                    document.getElementById("progressBar").value = 100;  // تحديث شريط التقدم إلى النهاية
+                    document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة بعد الانتهاء
                 }
             });
         }
@@ -193,7 +165,6 @@
             responsiveVoice.cancel();
             clearInterval(interval);
             document.getElementById("imageDisplay").style.display = "none";  // إخفاء الصورة عند الإيقاف
-            document.getElementById("progressBar").value = 0;  // إعادة شريط التقدم إلى البداية
             const spans = document.getElementById("textDisplay").getElementsByTagName("span");
             for (let span of spans) {
                 span.classList.remove("highlight");
