@@ -9,69 +9,195 @@
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #f7f9fc;
             color: #333;
-            text-align: center;
             margin: 0;
             padding: 20px;
+            text-align: center;
             direction: rtl;
         }
         h1 {
             font-size: 2em;
             margin-bottom: 20px;
         }
-        .language-selector {
-            margin-bottom: 20px;
-        }
-        .language-selector label {
-            margin: 0 10px;
-            font-size: 1.2em;
-        }
         textarea {
             width: 80%;
-            height: 150px;
-            font-size: 1.2em;
+            height: 120px;
+            font-size: 1.1em;
             padding: 10px;
+            margin: 20px 0;
             border: 1px solid #ccc;
             border-radius: 8px;
-            margin-bottom: 20px;
-            line-height: 1.8;
-            text-align: justify;
             resize: none;
+            line-height: 1.5;
         }
         .controls {
-            margin: 20px 0;
+            margin: 10px 0;
             display: flex;
             justify-content: center;
+            flex-wrap: wrap;
             gap: 10px;
         }
-        .controls button {
+        button {
             padding: 10px 20px;
             font-size: 1em;
-            margin: 5px;
-            border: none;
-            border-radius: 8px;
             background-color: #4CAF50;
             color: white;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
         }
-        .controls button:hover {
+        button:hover {
             background-color: #45a049;
         }
         .settings {
-            margin: 20px 0;
+            margin: 20px auto;
             display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
             justify-content: center;
-            gap: 20px;
         }
-        .settings label {
-            font-size: 1.2em;
+        label {
+            font-size: 1em;
+            margin: 5px;
         }
-        #imageDisplay {
-            margin: 20px;
-            display: none;
+        input[type="number"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 60px;
         }
-        #imageDisplay img {
-            width: 200px;
-            border-radius: 50%;
-            box-shadow: 
+        .language-selector {
+            margin-bottom: 20px;
+        }
+        #recordingStatus {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #ff0000;
+        }
+        #textDisplay {
+            margin-top: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="language-selector">
+        <label>
+            <input type="radio" name="language" value="arabic" checked> العربية
+        </label>
+        <label>
+            <input type="radio" name="language" value="english"> English
+        </label>
+    </div>
+
+    <h1 id="appTitle">تحويل النص إلى صوت</h1>
+
+    <textarea id="textToConvert" placeholder="اكتب النص هنا..."></textarea>
+
+    <div class="controls">
+        <button onclick="convertTextToSpeech()" id="playButton">تشغيل الصوت</button>
+        <button onclick="stopSpeech()" id="stopButton">إيقاف الصوت</button>
+    </div>
+
+    <div class="settings">
+        <label>
+            <input type="radio" name="voiceGender" value="male" checked> صوت ذكر
+        </label>
+        <label>
+            <input type="radio" name="voiceGender" value="female"> صوت أنثى
+        </label>
+        <label>
+            السرعة:
+            <input type="number" id="speedControl" value="1" min="0.5" max="2" step="0.1">
+        </label>
+    </div>
+
+    <div class="controls">
+        <button onclick="startRecording()" id="startRecordButton">بدء التسجيل</button>
+        <button onclick="stopRecording()" id="stopRecordButton">إيقاف التسجيل</button>
+    </div>
+
+    <audio id="audioPlayback" controls style="margin-top: 20px; display: none;"></audio>
+    <div id="recordingStatus">لم يتم بدء التسجيل بعد</div>
+
+    <script>
+        const texts = {
+            arabic: {
+                appTitle: "تحويل النص إلى صوت",
+                playButton: "تشغيل الصوت",
+                stopButton: "إيقاف الصوت",
+                startRecordButton: "بدء التسجيل",
+                stopRecordButton: "إيقاف التسجيل",
+                recordingStatus: "لم يتم بدء التسجيل بعد",
+            },
+            english: {
+                appTitle: "Text to Speech Converter",
+                playButton: "Play Sound",
+                stopButton: "Stop Sound",
+                startRecordButton: "Start Recording",
+                stopRecordButton: "Stop Recording",
+                recordingStatus: "Recording not started yet",
+            }
+        };
+
+        document.querySelectorAll('input[name="language"]').forEach((radio) => {
+            radio.addEventListener("change", function () {
+                const selectedLanguage = this.value;
+                changeLanguage(selectedLanguage);
+            });
+        });
+
+        function changeLanguage(language) {
+            document.getElementById("appTitle").textContent = texts[language].appTitle;
+            document.getElementById("playButton").textContent = texts[language].playButton;
+            document.getElementById("stopButton").textContent = texts[language].stopButton;
+            document.getElementById("startRecordButton").textContent = texts[language].startRecordButton;
+            document.getElementById("stopRecordButton").textContent = texts[language].stopRecordButton;
+            document.getElementById("recordingStatus").textContent = texts[language].recordingStatus;
+        }
+
+        function convertTextToSpeech() {
+            const text = document.getElementById("textToConvert").value.trim();
+            if (!text) {
+                alert("يرجى إدخال نص لتحويله إلى صوت.");
+                return;
+            }
+            const gender = document.querySelector('input[name="voiceGender"]:checked').value;
+            const speed = parseFloat(document.getElementById("speedControl").value) || 1;
+
+            const voice = gender === "male" ? "Arabic Male" : "Arabic Female";
+            responsiveVoice.speak(text, voice, { rate: speed });
+        }
+
+        function stopSpeech() {
+            responsiveVoice.cancel();
+        }
+
+        let recorder, audioChunks;
+        async function startRecording() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            audioChunks = [];
+
+            recorder.ondataavailable = (e) => audioChunks.push(e.data);
+            recorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks);
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = document.getElementById("audioPlayback");
+                audio.src = audioUrl;
+                audio.style.display = "block";
+            };
+
+            recorder.start();
+            document.getElementById("recordingStatus").textContent = "جاري التسجيل...";
+        }
+
+        function stopRecording() {
+            recorder.stop();
+            document.getElementById("recordingStatus").textContent = "تم إيقاف التسجيل.";
+        }
+    </script>
+</body>
+</html>
